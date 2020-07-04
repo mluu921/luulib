@@ -76,3 +76,35 @@ surv_plot <-
     return(km)
   }
 
+
+format_surv_table <- function(fit, times) {
+  fit <- summary(fit, times)
+
+  table <- tibble(
+    'strata' = fit$strata %>% str_remove(., 'trt='),
+    'time' = fit$time,
+    'risk' = fit$n.risk,
+    'event' = fit$n.event,
+    'surv' = fit$surv,
+    'std.error' = fit$std.err,
+    'lower' = fit$lower,
+    'upper' = fit$upper
+  )
+
+  out <- table %>%
+    select(-std.error) %>%
+    group_by(strata) %>%
+    gt() %>%
+    cols_label(
+      time = 'Time',
+      risk = '# Risk',
+      event = '# Event',
+      surv = 'Survival',
+      lower = 'Lower 95% CI',
+      upper = 'Upper 95% CI'
+    ) %>%
+    fmt_percent(columns = vars(surv, lower, upper),
+                decimals = 1)
+
+  return(out)
+}
