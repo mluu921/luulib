@@ -104,7 +104,15 @@ format_surv_table <- function(fit, times) {
       upper = 'Upper 95% CI'
     ) %>%
     fmt_percent(columns = vars(surv, lower, upper),
-                decimals = 1)
+                decimals = 1) %>%
+    tab_style(
+      style = cell_text(weight = 'bold'),
+      locations = cells_row_groups()
+    ) %>%
+    tab_style(
+      style = cell_text(weight = 'bold'),
+      locations = cells_column_labels(everything())
+    )
 
   return(out)
 }
