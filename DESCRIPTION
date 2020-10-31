@@ -25,4 +25,7 @@ Imports:
     rlang,
     forcats,
     stringr,
-    stats
+    stats,
+    patchwork,
+    tidyr
+RoxygenNote: 7.1.1

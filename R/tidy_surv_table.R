@@ -1,3 +1,15 @@
+#' Tidy survival estimates into GT tables
+#'
+#' @param fit survfit object
+#' @param times sequences of times to generate the survival estimates for
+#'
+#' @return
+#' @export
+#' @import gt
+#' @import dplyr
+#' @importFrom stringr str_remove
+#'
+#' @examples
 tidy_surv_table <- function(fit, times) {
   fit <- summary(fit, times)
 
