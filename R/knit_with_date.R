@@ -5,8 +5,7 @@ knit_with_date <- function(input, ...) {
   rmarkdown::render(
     input,
     output_file = paste0(
-      xfun::sans_ext(input), '-', Sys.Date(), '.html',
-      xfun::file_ext(input)
+      xfun::sans_ext(input), '-', Sys.Date(), '.html'
     ),
     envir = globalenv()
   )
