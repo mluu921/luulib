@@ -1,3 +1,15 @@
+#' Tidy cox model results
+#'
+#' @param fit cox fit object
+#' @param exponentiate exponentiate the results
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#'
+#'
+#'
 tidy_cox_model <- function(fit, exponentiate = T) {
   broom::tidy(fit, exponentiate = exponentiate) %>%
     mutate(

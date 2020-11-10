@@ -31,6 +31,7 @@ surv_plot <-
            xlim = NULL,
            plot_table_size = 5,
            expand_plot = 0,
+           curve_labels_nudge_x = 1,
            curve_labels = NULL,
            curve_text_size = 5) {
 
@@ -119,7 +120,7 @@ surv_plot <-
         aes(label = strata, color = strata),
         segment.alpha = .5,
         point.padding = 0,
-        nudge_x = 1,
+        nudge_x = curve_labels_nudge_x,
         direction = 'y',
         hjust = 0,
         size = curve_text_size,

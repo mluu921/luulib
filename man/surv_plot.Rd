@@ -11,6 +11,7 @@ surv_plot(
   xlim = NULL,
   plot_table_size = 5,
   expand_plot = 0,
+  curve_labels_nudge_x = 1,
   curve_labels = NULL,
   curve_text_size = 5
 )
