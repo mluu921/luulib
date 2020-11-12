@@ -10,8 +10,8 @@
 #'
 #'
 #'
-tidy_cox_model <- function(fit, exponentiate = T, conf.int = T) {
-  broom::tidy(fit, exponentiate = exponentiate, conf.int = conf.int) %>%
+tidy_cox_model <- function(fit) {
+  broom::tidy(fit, exponentiate = T, conf.int = T) %>%
     mutate(
       across(c(estimate, conf.low, conf.high), ~ format(round(.x, 3), 3)),
       hr = glue::glue('{estimate} ({conf.low} to {conf.high})'),
@@ -19,5 +19,9 @@ tidy_cox_model <- function(fit, exponentiate = T, conf.int = T) {
     ) %>%
     select(
       term, hr, p.value
+    ) %>%
+    mutate(
+      hr = ifelse(str_detect(term, 'rcs'), '-', hr),
+      p.value = ifelse(str_detect(term, 'rcs'), '-', p.value)
     )
 }
