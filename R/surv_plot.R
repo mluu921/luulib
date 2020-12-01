@@ -31,6 +31,7 @@ surv_plot <-
            xlim = NULL,
            plot_table_size = 5,
            expand_plot = 0,
+           plot_title = NULL,
            curve_labels_nudge_x = 1,
            curve_labels = NULL,
            curve_text_size = 5) {
@@ -91,7 +92,7 @@ surv_plot <-
              aes(x = time,
                  y = estimate)) +
       geom_step(size = 1, aes(color = strata, linetype = strata))  +
-      labs(x = 'Time, mo', y = 'Overall Survival, %') +
+      labs(x = 'Time, mo', y = 'Overall Survival, %', title = plot_title) +
       theme_classic(base_size = 15) +
       theme(
         legend.position = 'none',

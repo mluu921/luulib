@@ -4,7 +4,7 @@
 \alias{tidy_cox_model}
 \title{Tidy cox model results}
 \usage{
-tidy_cox_model(fit, exponentiate = T, conf.int = T)
+tidy_cox_model(fit)
 }
 \arguments{
 \item{fit}{cox fit object}
