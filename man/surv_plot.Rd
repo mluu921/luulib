@@ -14,7 +14,12 @@ surv_plot(
   plot_title = NULL,
   curve_labels_nudge_x = 1,
   curve_labels = NULL,
-  curve_text_size = 5
+  curve_text_size = 5,
+  plot_text_size = 15,
+  table_text_size = 15,
+  pvalue_text_size = 10,
+  curve_color_values = NULL,
+  curve_color_palette = ggsci::pal_d3()
 )
 }
 \arguments{
@@ -30,7 +35,13 @@ surv_plot(
 
 \item{expand_plot}{expand the plot to provide more room}
 
+\item{plot_title}{plot title}
+
 \item{curve_labels}{labels for the legend of the curve}
+
+\item{plot_text_size}{controls the plot theme text size}
+
+\item{table_text_size}{controls the table theme text size}
 
 \item{line_annotation_size}{size of the text for the annotation}
 }

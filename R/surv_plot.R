@@ -7,7 +7,10 @@
 #' @param xlim limits for the x axis
 #' @param plot_table_size size of the table
 #' @param expand_plot expand the plot to provide more room
+#' @param plot_title plot title
 #' @param line_annotation_size size of the text for the annotation
+#' @param plot_text_size controls the plot theme text size
+#' @param table_text_size controls the table theme text size
 #'
 #' @return
 #' @export
@@ -34,7 +37,12 @@ surv_plot <-
            plot_title = NULL,
            curve_labels_nudge_x = 1,
            curve_labels = NULL,
-           curve_text_size = 5) {
+           curve_text_size = 5,
+           plot_text_size = 15,
+           table_text_size = 15,
+           pvalue_text_size = 5,
+           curve_color_values = NULL,
+           curve_color_palette = ggsci::pal_d3()) {
 
     ## get lr test results
     f <- fit$call$formula %>% formula()
@@ -93,7 +101,7 @@ surv_plot <-
                  y = estimate)) +
       geom_step(size = 1, aes(color = strata, linetype = strata))  +
       labs(x = 'Time, mo', y = 'Overall Survival, %', title = plot_title) +
-      theme_classic(base_size = 15) +
+      theme_classic(base_size = plot_text_size) +
       theme(
         legend.position = 'none',
         legend.title = element_blank(),
@@ -114,7 +122,8 @@ surv_plot <-
         label = paste0('Logrank test: ', p),
         hjust = 0,
         x = 0,
-        y = 0
+        y = 0,
+        size = pvalue_text_size
       ) +
       geom_text_repel(
         data = plot_labels,
@@ -127,7 +136,7 @@ surv_plot <-
         size = curve_text_size,
         segment.color = 'black'
       ) +
-      scale_color_d3()
+      scale_color_manual(palette = curve_color_palette, values = curve_color_values)
 
     temp <- summary(fit, times = seq(0, 500, break_x_by))
 
@@ -154,7 +163,7 @@ surv_plot <-
       geom_text(aes(label = n.risk), size = plot_table_size) +
       scale_x_continuous(breaks = seq(0, max(table_dat$time), break_x_by), limits = c(0, plot_xlim[[2]]+expand_plot)) +
       labs(title = 'No. at Risk') +
-      theme_minimal(base_size = 15) +
+      theme_minimal(base_size = table_text_size) +
       theme(
         plot.title = element_text(size = 12),
         panel.grid = element_blank(),

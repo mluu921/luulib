@@ -25,3 +25,4 @@ tidy_cox_model <- function(fit) {
       p.value = ifelse(str_detect(term, 'rcs'), '-', p.value)
     )
 }
+
