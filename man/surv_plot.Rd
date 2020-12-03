@@ -17,7 +17,7 @@ surv_plot(
   curve_text_size = 5,
   plot_text_size = 15,
   table_text_size = 15,
-  pvalue_text_size = 10,
+  pvalue_text_size = 5,
   curve_color_values = NULL,
   curve_color_palette = ggsci::pal_d3()
 )
