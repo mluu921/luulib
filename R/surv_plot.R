@@ -109,7 +109,7 @@ surv_plot <-
     }
 
     if (curve_line_types == T) {
-      linetype <- rlang::sym(strata)
+      linetype <- rlang::quo(strata)
 
     }
 
