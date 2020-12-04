@@ -121,7 +121,7 @@ surv_plot <-
       ggplot(plot_dat,
              aes(x = time,
                  y = estimate)) +
-      geom_step(size = 1, aes(color = strata, linetype = linetype))  +
+      geom_step(size = 1, aes(color = strata, linetype = !!linetype))  +
       labs(x = 'Time, mo', y = 'Overall Survival, %', title = plot_title) +
       theme_classic(base_size = plot_text_size) +
       theme(
