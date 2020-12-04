@@ -41,6 +41,7 @@ surv_plot <-
            curve_labels_nudge_x = 1,
            curve_labels = NULL,
            curve_text_size = 5,
+           curve_line_size = 1,
            plot_text_size = 15,
            table_text_size = 15,
            pvalue_text_size = 5,
@@ -121,7 +122,7 @@ surv_plot <-
       ggplot(plot_dat,
              aes(x = time,
                  y = estimate)) +
-      geom_step(size = 1, aes(color = strata, linetype = !!linetype))  +
+      geom_step(size = curve_line_size, aes(color = strata, linetype = !!linetype))  +
       labs(x = 'Time, mo', y = 'Overall Survival, %', title = plot_title) +
       theme_classic(base_size = plot_text_size) +
       theme(
