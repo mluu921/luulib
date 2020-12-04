@@ -11,6 +11,8 @@
 #' @param line_annotation_size size of the text for the annotation
 #' @param plot_text_size controls the plot theme text size
 #' @param table_text_size controls the table theme text size
+#' @param pvalue_text_size controls the pvalue or label text size
+#' @param log_rank controls whether to show p value for log rank test or provide string for custom label
 #'
 #' @return
 #' @export
@@ -42,16 +44,25 @@ surv_plot <-
            table_text_size = 15,
            pvalue_text_size = 5,
            curve_color_values = NULL,
+           log_rank = T,
            curve_color_palette = ggsci::pal_d3()) {
 
-    ## get lr test results
-    f <- fit$call$formula %>% formula()
+    if(log_rank == T) {
+      ## get lr test results
+      f <- fit$call$formula %>% formula()
 
-    lr <- survdiff(f, data = data)
+      lr <- survdiff(f, data = data)
 
-    p <- pchisq(lr$chisq, length(lr$n) - 1, lower.tail = F)
+      p <- pchisq(lr$chisq, length(lr$n) - 1, lower.tail = F)
 
-    p <- ifelse(p < 0.001, 'p < 0.001', paste0('p = ', format(round(p, 3), 3)))
+      p <- ifelse(p < 0.001, 'p < 0.001', paste0('p = ', format(round(p, 3), 3)))
+
+      p_label <- paste0('Logrank test: ', p)
+
+    } else {
+      p_label <- log_rank
+
+    }
 
     ## create plot data
     plot_dat <- tidy(fit) %>% mutate(strata = as_factor(strata))
@@ -119,7 +130,7 @@ surv_plot <-
       ) +
       annotate(
         geom = 'text',
-        label = paste0('Logrank test: ', p),
+        label = p_label,
         hjust = 0,
         x = 0,
         y = 0,

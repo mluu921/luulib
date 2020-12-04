@@ -19,6 +19,7 @@ surv_plot(
   table_text_size = 15,
   pvalue_text_size = 5,
   curve_color_values = NULL,
+  log_rank = T,
   curve_color_palette = ggsci::pal_d3()
 )
 }
@@ -42,6 +43,10 @@ surv_plot(
 \item{plot_text_size}{controls the plot theme text size}
 
 \item{table_text_size}{controls the table theme text size}
+
+\item{pvalue_text_size}{controls the pvalue or label text size}
+
+\item{log_rank}{controls whether to show p value for log rank test or provide string for custom label}
 
 \item{line_annotation_size}{size of the text for the annotation}
 }
