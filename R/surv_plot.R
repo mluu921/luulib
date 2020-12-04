@@ -145,7 +145,8 @@ surv_plot <-
         direction = 'y',
         hjust = 0,
         size = curve_text_size,
-        segment.color = 'black'
+        segment.color = 'black',
+        min.segment.length = Inf
       ) +
       scale_color_manual(palette = curve_color_palette, values = curve_color_values) +
       coord_cartesian(clip = 'off')
