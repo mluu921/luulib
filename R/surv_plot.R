@@ -147,7 +147,8 @@ surv_plot <-
         size = curve_text_size,
         segment.color = 'black'
       ) +
-      scale_color_manual(palette = curve_color_palette, values = curve_color_values)
+      scale_color_manual(palette = curve_color_palette, values = curve_color_values) +
+      coord_cartesian(clip = 'off')
 
     temp <- summary(fit, times = seq(0, 500, break_x_by))
 
