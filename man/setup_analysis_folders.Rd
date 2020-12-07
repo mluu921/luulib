@@ -10,7 +10,7 @@ setup_analysis_folders()
 
 }
 \description{
-Creates standard src, reports, figures, data, and docs folder
+Creates standard src, reports, figures, data, munge, and docs folder
 }
 \examples{
 

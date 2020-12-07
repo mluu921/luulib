@@ -15,6 +15,7 @@ surv_plot(
   curve_labels_nudge_x = 1,
   curve_labels = NULL,
   curve_text_size = 5,
+  curve_line_size = 1,
   plot_text_size = 15,
   table_text_size = 15,
   pvalue_text_size = 5,
