@@ -70,7 +70,21 @@ surv_plot <-
     }
 
     ## create plot data
-    plot_dat <- tidy(fit) %>% mutate(strata = as_factor(strata))
+
+
+    s <- summary(fit, times = c(0, unique(fit$time)))
+
+    plot_data <- tibble(
+      time = c(s$time),
+      n.risk = c(s$n.risk),
+      n.event = c(s$n.event),
+      n.censor = c(s$n.censor),
+      estimate = c(s$surv),
+      std.error = c(s$std.err),
+      conf.high = c(s$upper),
+      conf.low = c(s$lower),
+      strata = c(s$strata)
+    ) %>% mutate(strata = as_factor(strata))
 
     if(is.null(xlim)) {
 
