@@ -22,7 +22,9 @@ surv_plot(
   curve_color_values = NULL,
   curve_line_types = T,
   log_rank = T,
-  curve_color_palette = ggsci::pal_d3()
+  curve_color_palette = ggsci::pal_d3(),
+  xlab = "Time, mo",
+  ylab = "Overall Survival, \%"
 )
 }
 \arguments{

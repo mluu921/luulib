@@ -48,7 +48,9 @@ surv_plot <-
            curve_color_values = NULL,
            curve_line_types = T,
            log_rank = T,
-           curve_color_palette = ggsci::pal_d3()) {
+           curve_color_palette = ggsci::pal_d3(),
+           xlab = 'Time, mo',
+           ylab = 'Overall Survival, %') {
 
     if(log_rank == T) {
       ## get lr test results
@@ -123,7 +125,7 @@ surv_plot <-
              aes(x = time,
                  y = estimate)) +
       geom_step(size = curve_line_size, aes(color = strata, linetype = !!linetype))  +
-      labs(x = 'Time, mo', y = 'Overall Survival, %', title = plot_title) +
+      labs(x = xlab, y = ylab, title = plot_title) +
       theme_classic(base_size = plot_text_size) +
       theme(
         legend.position = 'none',
