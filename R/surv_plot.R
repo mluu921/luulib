@@ -71,7 +71,6 @@ surv_plot <-
 
     ## create plot data
 
-
     s <- summary(fit, times = c(0, unique(fit$time)))
 
     plot_data <- tibble(
