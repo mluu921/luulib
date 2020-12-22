@@ -133,6 +133,16 @@ surv_plot <-
       linetype <- NULL
     }
 
+    if (is.null(curve_color_values)) {
+
+      scale_color <- scale_color_manual(palette = curve_color_palette)
+
+    } else {
+
+      scale_color <- scale_color_manual(values = curve_color_values)
+
+    }
+
     plot <-
       ggplot(plot_dat,
              aes(x = time,
@@ -175,7 +185,7 @@ surv_plot <-
         segment.color = 'black',
         min.segment.length = Inf
       ) +
-      scale_color_manual(palette = curve_color_palette, values = curve_color_values) +
+      scale_color +
       coord_cartesian(clip = 'off')
 
     temp <- summary(fit, times = seq(0, 500, break_x_by))
