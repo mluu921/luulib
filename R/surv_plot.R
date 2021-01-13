@@ -48,6 +48,9 @@ surv_plot <-
            curve_color_values = NULL,
            curve_line_types = T,
            log_rank = T,
+           custom_label = F,
+           custom_label_location,
+           custom_label_size,
            curve_color_palette = ggsci::pal_d3(),
            xlab = 'Time, mo',
            ylab = 'Overall Survival, %') {
@@ -143,6 +146,19 @@ surv_plot <-
 
     }
 
+    if (custom_label != F) {
+      custom_annotation <- annotate(
+        geom = 'text',
+        label = custom_label,
+        hjust = 0,
+        x = custom_label_location[[1]],
+        y = custom_label_location[[2]],
+        size = custom_label_size
+      )
+    } else {
+      custom_annotation <- NULL
+    }
+
     plot <-
       ggplot(plot_dat,
              aes(x = time,
@@ -186,7 +202,8 @@ surv_plot <-
         min.segment.length = Inf
       ) +
       scale_color +
-      coord_cartesian(clip = 'off')
+      coord_cartesian(clip = 'off') +
+      custom_annotation
 
     temp <- summary(fit, times = seq(0, 500, break_x_by))
 
