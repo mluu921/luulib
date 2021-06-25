@@ -1,4 +1,4 @@
-#' Tidy cox model results
+#' Broom wrapper to tidy cox model results
 #'
 #' @param fit cox fit object
 #' @param exponentiate exponentiate the results

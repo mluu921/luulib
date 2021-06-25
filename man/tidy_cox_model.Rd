@@ -2,7 +2,7 @@
 % Please edit documentation in R/tidy_cox_model.R
 \name{tidy_cox_model}
 \alias{tidy_cox_model}
-\title{Tidy cox model results}
+\title{Broom wrapper to tidy cox model results}
 \usage{
 tidy_cox_model(fit)
 }
@@ -15,7 +15,7 @@ tidy_cox_model(fit)
 
 }
 \description{
-Tidy cox model results
+Broom wrapper to tidy cox model results
 }
 \examples{
 

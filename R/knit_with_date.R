@@ -1,6 +1,7 @@
 #' Custom Knit function for RStudio
 #'
 #' @export
+
 knit_with_date <- function(input, ...) {
   rmarkdown::render(
     input,

@@ -30,7 +30,7 @@
 #'
 #' @examples
 #'
-surv_plot <-
+surv_plot_old <-
   function(data,
            fit,
            break_x_by = 12,
@@ -50,7 +50,7 @@ surv_plot <-
            log_rank = T,
            custom_label = F,
            custom_label_location,
-           custom_label_size,
+           custom_label_size = 5,
            curve_color_palette = ggsci::pal_d3(),
            xlab = 'Time, mo',
            ylab = 'Overall Survival, %') {
