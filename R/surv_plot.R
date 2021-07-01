@@ -1,249 +1,210 @@
-#' Create a Kaplan-Meier Plot with Corresponding 'at risk' table
+#' Helper function to extract survfit summary objects
 #'
-#' @param data a tibble or dataframe
-#' @param fit a survfit model
-#' @param curve_labels labels for the legend of the curve
-#' @param break_x_by sequence for the x axis
-#' @param xlim limits for the x axis
-#' @param plot_table_size size of the table
-#' @param expand_plot expand the plot to provide more room
-#' @param plot_title plot title
-#' @param line_annotation_size size of the text for the annotation
-#' @param plot_text_size controls the plot theme text size
-#' @param table_text_size controls the table theme text size
-#' @param pvalue_text_size controls the pvalue or label text size
-#' @param log_rank controls whether to show p value for log rank test or provide string for custom label
-#' @param curve_line_types logical - controls whether to have different line types for each curve
+#' @param fit summary survfit object
 #'
 #' @return
 #' @export
-#' @import ggplot2
-#' @import ggrepel
-#' @import survival
-#' @import ggsci
-#' @import dplyr
-#' @import broom
-#' @import forcats
-#' @importFrom tidyr complete
-#' @importFrom stats formula pchisq
-#' @import patchwork
 #'
 #' @examples
 #'
-surv_plot_old <-
-  function(data,
-           fit,
-           break_x_by = 12,
-           xlim = NULL,
-           plot_table_size = 5,
-           expand_plot = 0,
-           plot_title = NULL,
-           curve_labels_nudge_x = 1,
-           curve_labels = NULL,
-           curve_text_size = 5,
-           curve_line_size = 1,
-           plot_text_size = 15,
-           table_text_size = 15,
-           pvalue_text_size = 5,
-           curve_color_values = NULL,
-           curve_line_types = T,
-           log_rank = T,
-           custom_label = F,
-           custom_label_location,
-           custom_label_size = 5,
-           curve_color_palette = ggsci::pal_d3(),
-           xlab = 'Time, mo',
-           ylab = 'Overall Survival, %') {
+#' tidy_summary_survfit
+#'
+#'
 
-    if(log_rank == T) {
-      ## get lr test results
-      f <- fit$call$formula %>% formula()
+tidy_summary_survfit <- function(fit) {
 
-      lr <- survdiff(f, data = data)
+  tibble(
+    time = fit$time,
+    n.risk = fit$n.risk,
+    n.event = fit$n.event,
+    n.censor = fit$n.censor,
+    estimate = fit$surv,
+    std.error = fit$std.err,
+    conf.high = fit$upper,
+    conf.low = fit$lower,
+    strata = fit$strata
+  )
+}
 
-      p <- pchisq(lr$chisq, length(lr$n) - 1, lower.tail = F)
+#' Title
+#'
+#' @param data
+#' @param fit
+#' @param break_x_by
+#' @param xlim
+#' @param curve_labels
+#' @param curve_text_size
+#' @param logrank_test
+#' @param table_title
+#' @param table_title_size
+#' @param table_text_size
+#' @param table_label_spacing
+#' @param plot_table_ratio
+#' @param pvalue_text_size
+#' @param pvalue_text_location
+#' @param curve_color_palette
+#' @param xlab
+#' @param ylab
+#' @param theme_plot_text_size
+#'
+#' @return
+#' @export
+#'
+#' @examples
+surv_plot <- function(data,
+                      fit,
+                      break_x_by = 12,
+                      xlim = NULL,
+                      curve_labels = NULL,
+                      curve_text_size = 5,
+                      logrank_test = T,
+                      table_title = 'No. at risk',
+                      table_title_size = 15,
+                      table_text_size = 5,
+                      table_label_spacing = 20,
+                      plot_table_ratio = c(.9, .1),
+                      pvalue_text_size = 5,
+                      pvalue_text_location = c(.02, .02),
+                      curve_color_palette = ggsci::pal_d3(),
+                      expand_plot_area = 12,
+                      theme_plot_text_size = 15,
+                      plot_margin =  margin(10, 50, 0, 50),
+                      table_margin = margin(0, 0, 15, 0),
+                      xlab = 'Time, mo',
+                      ylab = 'Overall Survival, %') {
 
-      p <- ifelse(p < 0.001, 'p < 0.001', paste0('p = ', format(round(p, 3), 3)))
+  # extract the plot data ---------------------------------------------------
 
-      p_label <- paste0('Logrank test: ', p)
+  plot_data <- summary(fit, times = c(0, unique(fit$time))) %>%
+    tidy_summary_survfit() %>%
+    filter(time <= xlim[[2]]+1) %>%
+    mutate(strata = as_factor(strata))
 
-    } else {
-      p_label <- log_rank
+  if (!is.null(curve_labels)) {
+    plot_data <- plot_data %>%
+      mutate(strata = factor(strata, labels = curve_labels))
+  }
 
-    }
+  # extract the last point for the plot labels ------------------------------
 
-    ## create plot data
+  labels <- plot_data %>%
+    group_by(strata) %>%
+    filter(time == max(time)) %>%
+    ungroup()
 
-    s <- summary(fit, times = c(0, unique(fit$time)))
+  # log rank test -----------------------------------------------------------
 
-    plot_dat <- tibble(
-      time = c(s$time),
-      n.risk = c(s$n.risk),
-      n.event = c(s$n.event),
-      n.censor = c(s$n.censor),
-      estimate = c(s$surv),
-      std.error = c(s$std.err),
-      conf.high = c(s$upper),
-      conf.low = c(s$lower),
-      strata = c(s$strata)
-    ) %>% mutate(strata = as_factor(strata))
+  lr <- survdiff(eval(fit$call$formula, envir = parent.frame()), data = data)
 
-    if(is.null(xlim)) {
+  p <-
+    pchisq(lr$chisq, length(lr$n) - 1, lower.tail = F) %>% scales::pvalue(., add_p = T)
 
-      plot_dat
+  if (logrank_test == T) {
+    annotate_p <- annotate(
+      'text',
+      x = max(plot_data$time) * pvalue_text_location[[1]],
+      y = pvalue_text_location[[2]],
+      label = paste0('Logrank Test: ', p),
+      hjust = 0,
+      vjust = 0,
+      size = pvalue_text_size
+    )
 
-      plot_xlim <- c(0, max(plot_dat$time))
+  } else {
 
-
-    } else {
-
-      plot_xlim <- xlim
-
-      plot_dat <- plot_dat %>%
-        filter(
-          time <= plot_xlim[[2]]
-        )
-
-    }
-
-    plot_labels <- plot_dat %>%
-      group_by(strata) %>%
-      slice_tail(n = 1) %>%
-      ungroup()
-
-    if (is.null(curve_labels)) {
-      plot_labels <- plot_labels %>%
-        mutate(strata = as_factor(strata))
-
-      plot_dat <- plot_dat %>%
-        mutate(strata = as_factor(strata))
-    } else {
-      plot_labels <- plot_labels %>%
-        mutate(strata = as_factor(strata)) %>%
-        mutate(strata = factor(strata, labels = curve_labels))
-
-      plot_dat <- plot_dat %>%
-        mutate(strata = as_factor(strata)) %>%
-        mutate(strata = factor(strata, labels = curve_labels))
-    }
-
-    if (curve_line_types == T) {
-      linetype <- rlang::quo(strata)
-
-    }
-
-    if (curve_line_types == F) {
-      linetype <- NULL
-    }
-
-    if (is.null(curve_color_values)) {
-
-      scale_color <- scale_color_manual(palette = curve_color_palette)
-
-    } else {
-
-      scale_color <- scale_color_manual(values = curve_color_values)
-
-    }
-
-    if (custom_label != F) {
-      custom_annotation <- annotate(
-        geom = 'text',
-        label = custom_label,
-        hjust = 0,
-        x = custom_label_location[[1]],
-        y = custom_label_location[[2]],
-        size = custom_label_size
-      )
-    } else {
-      custom_annotation <- NULL
-    }
-
-    plot <-
-      ggplot(plot_dat,
-             aes(x = time,
-                 y = estimate)) +
-      geom_step(size = curve_line_size, aes(color = strata, linetype = !!linetype))  +
-      labs(x = xlab, y = ylab, title = plot_title) +
-      theme_classic(base_size = plot_text_size) +
-      theme(
-        legend.position = 'none',
-        legend.title = element_blank(),
-        axis.title = element_text(face = 'bold'),
-        legend.background = element_blank(),
-        legend.key.width = unit(3, 'lines'),
-        legend.text = element_text(),
-        plot.margin = unit(c(0, 0, 0, 0), 'lines')
-      ) +
-      scale_y_continuous(labels = scales::percent_format(),
-                         limits = c(0, 1)) +
-      scale_x_continuous(
-        breaks = seq(0, plot_xlim[[2]], break_x_by),
-        limits = c(0, plot_xlim[[2]] + expand_plot)
-      ) +
-      annotate(
-        geom = 'text',
-        label = p_label,
-        hjust = 0,
-        x = 0,
-        y = 0,
-        size = pvalue_text_size
-      ) +
-      geom_text_repel(
-        data = plot_labels,
-        aes(label = strata, color = strata),
-        segment.alpha = .5,
-        point.padding = 0,
-        nudge_x = curve_labels_nudge_x,
-        direction = 'y',
-        hjust = 0,
-        size = curve_text_size,
-        segment.color = 'black',
-        min.segment.length = Inf
-      ) +
-      scale_color +
-      coord_cartesian(clip = 'off') +
-      custom_annotation
-
-    temp <- summary(fit, times = seq(0, 500, break_x_by))
-
-    table_dat <- tibble(
-      time = temp$time,
-      strata = temp$strata,
-      n.risk = temp$n.risk
-    ) %>% complete(., strata, time, fill = list(n.risk = 0)) %>%
-      filter(
-        time <= plot_xlim[[2]]
-      )
-
-    if (is.null(curve_labels)) {
-      table_dat <- table_dat %>%
-        mutate(strata = as_factor(strata))
-    } else {
-      table_dat <- table_dat %>%
-        mutate(strata = as_factor(strata)) %>%
-        mutate(strata = factor(strata, labels = curve_labels))
-    }
-
-    plot_table <-
-      ggplot(table_dat, aes(x = time, y = fct_rev(strata))) +
-      geom_text(aes(label = n.risk), size = plot_table_size) +
-      scale_x_continuous(breaks = seq(0, max(table_dat$time), break_x_by), limits = c(0, plot_xlim[[2]]+expand_plot)) +
-      labs(title = 'No. at Risk') +
-      theme_minimal(base_size = table_text_size) +
-      theme(
-        plot.title = element_text(size = 12),
-        panel.grid = element_blank(),
-        axis.text.x = element_blank(),
-        axis.title = element_blank(),
-        axis.text.y = element_text(size = 12),
-        plot.margin = unit(c(0,0,0,0), 'lines')
-      )
-
-    out <-
-      plot / plot_table + plot_layout(nrow = 2, height = c(5, 1.75))
-
-    return(out)
-
+    annotate_p <- NULL
 
   }
+
+  # generate the color pallete ----------------------------------------------
+
+  if (class(curve_color_palette) == 'function') {
+    colors <- curve_color_palette(length(labels$strata))
+
+    curve_colors <- scale_color_manual(values = colors)
+
+  }
+
+  if (class(curve_color_palette) == 'character') {
+    curve_colors <- scale_color_manual(values = curve_color_palette)
+
+  }
+
+
+  # create the plot ---------------------------------------------------------
+
+  plot <- ggplot(plot_data, aes(x = time, y = estimate)) +
+    geom_step(aes(group = strata, color = strata), size = 1) +
+    scale_x_continuous(breaks = seq(0, max(plot_data$time), break_x_by), expand = expansion(mult = .1)) +
+    coord_cartesian(
+      xlim = c(xlim[[1]], xlim[[2]]),
+      ylim = c(0, 1),
+      expand = F,
+      clip = 'off'
+    ) +
+    theme_classic(base_size = theme_plot_text_size) +
+    labs(x = xlab, y = ylab) +
+    theme(
+      axis.line.y.right = element_blank(),
+      axis.ticks.y.right = element_blank(),
+      legend.position = 'none',
+      axis.title = element_text(face = 'bold'),
+      plot.margin = plot_margin
+    ) +
+    scale_y_continuous(
+      labels = scales::percent_format()
+    ) +
+    ggrepel::geom_text_repel(
+      data = labels,
+      aes(x = time, y = estimate, label = strata, color = strata),
+      segment.alpha = .25,
+      size = curve_text_size,
+      fontface = 'bold',
+      direction = 'y',
+      point.padding = 0,
+      nudge_x = 1,
+      hjust = 0,
+      vjust = .5,
+      xlim = c(0, Inf)) +
+    annotate_p +
+    curve_colors
+
+  # extract the table data --------------------------------------------------
+
+  table_data <-
+    summary(fit, times = seq(0, xlim[[2]], break_x_by)) %>%
+    tidy_summary_survfit() %>%
+    mutate(strata = as_factor(strata))
+
+  if (!is.null(curve_labels)) {
+    table_data <- table_data %>%
+      mutate(strata = factor(strata, labels = curve_labels))
+  }
+
+  # create the table --------------------------------------------------------
+
+  table <-
+    ggplot(table_data, aes(x = time, y = fct_rev(strata)))   +
+    geom_text(aes(label = n.risk), size = table_text_size) +
+    theme_bw(base_size = 15) +
+    theme(
+      axis.text.y = element_text(margin = margin(0, table_label_spacing, 0, 0)),
+      axis.ticks = element_blank(),
+      axis.title = element_blank(),
+      panel.grid = element_blank(),
+      panel.border = element_blank(),
+      axis.text.x = element_blank(),
+      plot.title = element_text(margin = margin(0, 0, 15, 0), size = table_title_size),
+      plot.title.position = 'panel',
+      plot.margin = table_margin
+    ) +
+    coord_cartesian(xlim = c(xlim[[1]], xlim[[2]]),
+                    expand = F,
+                    clip = 'off') +
+    labs(title = table_title)
+
+  plot / table +
+    plot_layout(heights = plot_table_ratio)
+
+}
+
