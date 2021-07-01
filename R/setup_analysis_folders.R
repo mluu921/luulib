@@ -7,9 +7,7 @@
 #'
 #' @examples
 #'
-setup_analysis_folders <- function() {
-
-  folders <- c('src', 'reports', 'figures', 'data', 'docs', 'munge', 'tables', 'output')
+setup_analysis_folders <- function(folders = c('src', 'reports', 'figures', 'data', 'docs', 'munge', 'tables', 'output')) {
 
   purrr::walk(folders, ~ fs::dir_create(.x))
 
