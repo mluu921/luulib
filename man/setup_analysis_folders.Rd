@@ -4,7 +4,9 @@
 \alias{setup_analysis_folders}
 \title{Setup data analysis folder structure}
 \usage{
-setup_analysis_folders()
+setup_analysis_folders(
+  folders = c("src", "reports", "figures", "data", "docs", "munge", "tables", "output")
+)
 }
 \value{
 

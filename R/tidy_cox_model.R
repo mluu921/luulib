@@ -10,6 +10,7 @@
 #'
 #'
 #'
+
 tidy_cox_model <- function(fit) {
   broom::tidy(fit, exponentiate = T, conf.int = T) %>%
     mutate(
